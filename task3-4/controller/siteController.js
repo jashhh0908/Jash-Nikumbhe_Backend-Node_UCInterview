@@ -2,6 +2,7 @@ const axios = require('axios');
 
 const episodeModel = require('../model/episodeModel');
 
+//task 3
 //to fetch the data from API and add to the database
 async function seeding(req, res){
   try{
@@ -94,11 +95,64 @@ async function getEpisodeBySeason(req, res){
   }
 };
 
+//task 4
+//to edit all details of an epsiode
+async function editEpisodeFull(req, res){
+  try{
+    const id = req.params.id;
+    const EpData = req.body;
+    const updateEp = await episodeModel.findByIdAndUpdate(
+      id,
+      EpData,
+      { new: true, overwrite: true} // returns updated document, and overwrite the existing one 
+    );
+    if(!updateEp)
+      return res.status(404).json({ message: "Episode not updated" });
+    else
+      return res.status(200).json(updateEp);
+    } catch (error) {
+      res.status(500).json({ error: "Database error!"});
+    }
+}
+
+//to edit summary field of episode 
+async function editEpisodeSpecific(req, res) {
+  try{
+    const updatedEp = await episodeModel.findByIdAndUpdate(
+      req.params.id,
+      { $set: {summary: req.body.summary} }, //$set allows to set specific mentioned fields 
+      { new: true } // return updated document 
+    );
+    if(!updatedEp)
+      return res.status(404).json({ message: "Episode not updated" });
+    else
+      return res.status(200).json(updatedEp);
+    } catch (error) {
+      res.status(500).json({ error: "Database error!"});
+    }
+}
+
+//to deleted specific episode by ID
+async function deleteEpisode(req, res) {
+  try{
+    const deletedEp = await episodeModel.findByIdAndDelete(req.params.id);
+    if(!deletedEp)
+      return res.status(404).json({ message: "Episode not deleted" });
+    else
+      return res.status(200).json({ message: "Episode successfully deleted"});
+    } catch (error) {
+      res.status(500).json({ error: "Database error!"});
+    }
+}
 module.exports = {
   seeding,
   postEpisode,
   getEpisode,
   getEpisodeById,
   getSeason,
-  getEpisodeBySeason
+  getEpisodeBySeason,
+  editEpisodeFull,
+  editEpisodeSpecific,
+  deleteEpisode
 };
+
